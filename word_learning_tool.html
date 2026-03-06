@@ -1867,6 +1867,42 @@
         .hidden {
             display: none !important;
         }
+        
+        /* Loading 样式 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 16px;
+            color: #666;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -1960,7 +1996,7 @@
         
         <!-- 底部按钮 -->
         <div class="list-footer">
-            <button class="study-action-btn" onclick="startDetailedLearning()">开始详细学习</button>
+            <button class="study-action-btn" onclick="withUserCheck(startDetailedLearning)()">开始详细学习</button>
         </div>
     </div>
     
@@ -2324,6 +2360,12 @@
         </div>
     </div>
     
+    <!-- Loading 元素 -->
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">加载中，请稍候...</div>
+    </div>
+    
     <!-- 引入PDF.js库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     
@@ -2616,8 +2658,19 @@
         
 
         
+        // 显示加载中
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+        }
+        
+        // 隐藏加载中
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+        
         // 加载PDF文件
         async function loadPDF() {
+            showLoading();
             const pdfPath = currentFile;
             // console.log('开始加载PDF:', pdfPath);
             
@@ -2634,6 +2687,8 @@
                 console.error('加载PDF失败:', error);
                 // 使用模拟数据
                 loadMockData();
+            } finally {
+                hideLoading();
             }
         }
         
