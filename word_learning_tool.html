@@ -5491,7 +5491,7 @@ playTone: function(frequency, duration, type) {
         
         // 播放当前单词音频（安全版本，用于HTML onclick）
         function playCurrentWordAudio() {
-            const currentWord = words[currentWordIndex];
+            const currentWord = isErrorBookMode ? errorWords[currentWordIndex] : words[currentWordIndex];
             if (currentWord && currentWord.word) {
                 playWordAudio(currentWord.word, false);
             }
@@ -5571,11 +5571,17 @@ playTone: function(frequency, duration, type) {
             const phonetic = currentWord.phonetic || '';
             
             // 检查浏览器是否支持语音合成
-            if (!window.speechSynthesis) {
-                console.error('[播放音标] 错误：浏览器不支持 speechSynthesis');
-                return;
+            if (window.speechSynthesis) {
+                // 使用浏览器内置的语音合成
+                playPhoneticAudioNative(word, phonetic);
+            } else {
+                // 使用百度云语音合成API作为替代方案
+                playWordAudioBaidu(word, false);
             }
-            
+        }
+        
+        // 使用浏览器内置的语音合成播放音标
+        function playPhoneticAudioNative(word, phonetic) {
             // 播放音频
             const utterance = new SpeechSynthesisUtterance(word);
             utterance.lang = 'en-US';
