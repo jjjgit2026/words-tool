@@ -439,7 +439,7 @@
         
         .list-header {
             background: linear-gradient(180deg, #e8f5f0 0%, #f0f7f4 100%);
-            padding: 16px;
+            padding: 8px 16px;
             position: sticky;
             top: 0;
             z-index: 50;
@@ -449,7 +449,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 12px;
+            margin-bottom: 6px;
         }
         
         .back-btn {
@@ -716,7 +716,7 @@
         
         .link-header {
             background: rgba(255, 255, 255, 0.95);
-            padding: 16px;
+            padding: 8px 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -735,10 +735,10 @@
         /* 单词链条 */
         .word-chain {
             background: transparent;
-            padding: 16px 20px;
+            padding: 12px 16px;
             display: flex;
             overflow-x: auto;
-            gap: 16px;
+            gap: 12px;
             white-space: nowrap;
             box-shadow: none;
         }
@@ -802,10 +802,10 @@
             display: flex;
             justify-content: space-around;
             background: white;
-            padding: 12px;
-            margin: 12px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            padding: 8px 12px;
+            margin: 8px 12px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
         
         /* 撒花效果 */
@@ -911,15 +911,15 @@
         
         /* 学习内容区域 */
         .learning-content {
-            margin: 0 16px;
+            margin: 0 12px;
         }
         
         .step-content {
             display: none;
             background: white;
-            padding: 20px 24px 16px 24px;
-            border-radius: 16px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 16px 20px 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
         
         .step-content.active {
@@ -1332,7 +1332,7 @@
         
         /* 字母与音标的对应关系样式 */
         .letter-phonetic-map {
-            display: block;
+            display: none;
             margin: 16px 0;
             width: 100%;
             position: relative;
@@ -1937,7 +1937,7 @@
             <div class="list-header-bar">
                 <button class="back-btn" onclick="backToHome()">‹</button>
                 <div class="list-title" id="listTitle">外研版Join In-三年级下册</div>
-                <div style="width: 36px;"></div>
+                <div style="width: 16px;"></div>
             </div>
             
             <!-- 单元标签 -->
@@ -2023,12 +2023,7 @@
                     <div class="letter-phonetic-map" id="letterPhoneticMap">
                         <!-- 动态生成 -->
                     </div>
-                    
-                    <!-- 5. 音节划分和规则说明 -->
-                    <div class="syllables" id="syllables">
-                        <!-- 动态生成 -->
-                    </div>
-                    
+                
                     <!-- 操作按钮 -->
                     <div class="action-buttons">
                         <button class="next-btn" onclick="nextStep()">下一步</button>
@@ -2252,7 +2247,6 @@
         
         <!-- 底部按钮 -->
         <div class="list-footer">
-            <button class="refresh-btn" onclick="renderErrorWordList()">🔄</button>
             <button class="study-action-btn" onclick="startErrorWordLearning()">开始详细学习</button>
         </div>
     </div>
@@ -2423,6 +2417,8 @@
                     currentFile = this.dataset.file;
                     currentBookName = this.dataset.name;
                     updateBookDisplay();
+                    // 保存用户选择的课本
+                    saveUserBook();
                     closeBookModal();
                     loadPDF();
                 });
@@ -2489,6 +2485,9 @@
                 // 保存用户信息到localStorage
                 localStorage.setItem('currentUser', currentUser);
                 localStorage.setItem('currentUserName', currentUserName);
+                
+                // 加载用户最近学习的课本或默认课本
+                loadUserBook();
                 
                 // 加载用户统计数据
                 loadUserStats();
@@ -2620,7 +2619,7 @@
         // 加载PDF文件
         async function loadPDF() {
             const pdfPath = currentFile;
-            console.log('开始加载PDF:', pdfPath);
+            // console.log('开始加载PDF:', pdfPath);
             
             try {
                 const pdf = await pdfjsLib.getDocument({ 
@@ -2629,7 +2628,7 @@
                     cMapPacked: true
                 }).promise;
                 
-                console.log('PDF加载成功，页数:', pdf.numPages);
+                // console.log('PDF加载成功，页数:', pdf.numPages);
                 await processPDF(pdf);
             } catch (error) {
                 console.error('加载PDF失败:', error);
@@ -2648,17 +2647,17 @@
             }
             
             Promise.all(pages).then(function(pageList) {
-                console.log('获取页面成功，页面数:', pageList.length);
+                // console.log('获取页面成功，页面数:', pageList.length);
                 let contentPromises = pageList.map(page => page.getTextContent());
                 
                 Promise.all(contentPromises).then(function(contentList) {
-                    console.log('获取文本内容成功，页面数:', contentList.length);
+                    // console.log('获取文本内容成功，页面数:', contentList.length);
                     words = [];  // 重置单词列表
                     
                     // 解析每个页面的内容
                     contentList.forEach((content, pageIndex) => {
-                        console.log(`解析页面 ${pageIndex + 1} 的内容`);
-                        console.log('原始文本项:', content.items.length);
+                        // console.log(`解析页面 ${pageIndex + 1} 的内容`);
+                        // console.log('原始文本项:', content.items.length);
                         
                         // 按行组织文本
                         let lines = [];
@@ -2669,7 +2668,7 @@
                         content.items.forEach((item, index) => {
                             // 只输出前几个文本项的信息，避免日志过多
                             if (index < 5) {
-                                console.log(`文本项 ${index}:`, item);
+                                // console.log(`文本项 ${index}:`, item);
                             }
                             const y = item.transform[5];
                             if (lastY === null || Math.abs(y - lastY) > 0.5) {
@@ -2700,7 +2699,7 @@
                             lines.push(currentLine);
                         }
                         
-                        console.log(`页面 ${pageIndex + 1} 行数:`, lines.length);
+                        // console.log(`页面 ${pageIndex + 1} 行数:`, lines.length);
                         
                         // 按x坐标排序每行的文本
                         lines.forEach(line => {
@@ -2710,17 +2709,17 @@
                         // 打印每行内容
                         lines.forEach((line, lineIndex) => {
                             const lineText = line.map(item => item.str).join(' ');
-                            console.log(`页面 ${pageIndex + 1} 行 ${lineIndex + 1}:`, lineText);
+                            // console.log(`页面 ${pageIndex + 1} 行 ${lineIndex + 1}:`, lineText);
                         });
                         
                         // 寻找表格开始位置 - 找到第一个以数字序号为第一列的行
                         let tableStartIndex = -1;
-                        console.log(`页面 ${pageIndex + 1} 开始寻找表格，共 ${lines.length} 行`);
+                        // console.log(`页面 ${pageIndex + 1} 开始寻找表格，共 ${lines.length} 行`);
                         for (let i = 0; i < lines.length; i++) {
                             const line = lines[i];
                             // 获取整行文本
                             const lineText = line.map(item => item.str).join(' ').trim();
-                            console.log(`页面 ${pageIndex + 1} 行 ${i + 1} 内容: "${lineText}"`);
+                            // console.log(`页面 ${pageIndex + 1} 行 ${i + 1} 内容: "${lineText}"`);
                             
                             // 检查行内容是否以数字序号开头（如"1", "250"）
                             // 匹配行首的数字，后面可以跟空格、字母或结束
@@ -2728,21 +2727,21 @@
                             if (match) {
                                 const firstNumber = match[1];
                                 tableStartIndex = i;
-                                console.log(`页面 ${pageIndex + 1} 表格开始行:`, tableStartIndex + 1, `(找到序号: ${firstNumber})`);
+                                // console.log(`页面 ${pageIndex + 1} 表格开始行:`, tableStartIndex + 1, `(找到序号: ${firstNumber})`);
                                 break;
                             }
                         }
                         
                         // 从表格的第一行开始读取（包含序号行）
                         if (tableStartIndex !== -1) {
-                            console.log(`开始处理表格，表格开始行: ${tableStartIndex + 1}`);
+                            // console.log(`开始处理表格，表格开始行: ${tableStartIndex + 1}`);
                             // 存储单词信息，用于处理跨行的数据
                             let currentWord = null;
                             let currentPhonetic = null;
                             let currentMeaning = null;
                             let currentNumber = null;
                             
-                            console.log(`开始遍历表格行，共 ${lines.length - tableStartIndex} 行`);
+                            // console.log(`开始遍历表格行，共 ${lines.length - tableStartIndex} 行`);
                             
                             // 重新组织行数据，确保序号、单词、音标和释义正确对应
                             let wordLines = [];
@@ -2751,7 +2750,7 @@
                             for (let i = tableStartIndex; i < lines.length; i++) {
                                 const line = lines[i];
                                 const lineText = line.map(item => item.str).join(' ').trim();
-                                console.log(`处理行 ${i + 1}，内容: "${lineText}"`);
+                                // console.log(`处理行 ${i + 1}，内容: "${lineText}"`);
                                 
                                 // 检查是否为数字序号行（匹配行首的数字）
                                 const numberMatch = lineText.match(/^(\d+)(\s|$)/);
@@ -2760,29 +2759,29 @@
                                         // 这是新的单词序号行
                                         if (currentEntry && currentEntry.number) {
                                             wordLines.push(currentEntry);
-                                            console.log(`保存上一个单词条目:`, currentEntry);
+                                            // console.log(`保存上一个单词条目:`, currentEntry);
                                         }
                                         currentEntry = { number: firstItem, word: '', phonetic: '', meaning: '' };
-                                        console.log(`识别到新单词序号: ${firstItem}`);
+                                        // console.log(`识别到新单词序号: ${firstItem}`);
                                         
                                         // 检查当前行是否有单词（有些PDF序号和单词在同一行）
                                         if (line.length > 1) {
                                             const remainingText = line.slice(1).map(item => item.str).join(' ').trim();
-                                            console.log(`序号行剩余内容: "${remainingText}"`);
+                                            // console.log(`序号行剩余内容: "${remainingText}"`);
                                             // 确保剩余内容不是纯数字（避免把序号当成单词）
                                             if (remainingText && !remainingText.includes('/') && !remainingText.includes('[') && !/^\d+$/.test(remainingText)) {
                                                 currentEntry.word = remainingText;
-                                                console.log(`从序号行提取单词: "${currentEntry.word}"`);
+                                                // console.log(`从序号行提取单词: "${currentEntry.word}"`);
                                             }
                                         }
                                     } else if (currentEntry && currentEntry.number) {
                                         // 这是当前单词的后续行
-                                        console.log(`处理单词 ${currentEntry.number} 的后续行`);
+                                        // console.log(`处理单词 ${currentEntry.number} 的后续行`);
                                         
                                         // 检查是否为音标行
                                         if (lineText.includes('/') || lineText.includes('[')) {
                                             currentEntry.phonetic = lineText;
-                                            console.log(`提取音标: "${currentEntry.phonetic}"`);
+                                            // console.log(`提取音标: "${currentEntry.phonetic}"`);
                                         } else if (lineText) {
                                             // 移除小方格后处理
                                             const cleanedText = lineText.replace(/□/g, '').trim();
@@ -2790,7 +2789,7 @@
                                                 // 如果还没有单词，这行可能是单词
                                                 if (!currentEntry.word) {
                                                     currentEntry.word = cleanedText;
-                                                    console.log(`提取单词: "${currentEntry.word}"`);
+                                                    // console.log(`提取单词: "${currentEntry.word}"`);
                                                 } else {
                                                     // 这是释义行
                                                     if (currentEntry.meaning) {
@@ -2798,7 +2797,7 @@
                                                     } else {
                                                         currentEntry.meaning = cleanedText;
                                                     }
-                                                    console.log(`提取释义: "${currentEntry.meaning}"`);
+                                                    // console.log(`提取释义: "${currentEntry.meaning}"`);
                                                 }
                                             }
                                         }
@@ -2808,11 +2807,11 @@
                             // 添加最后一个单词
                             if (currentEntry && currentEntry.number) {
                                 wordLines.push(currentEntry);
-                                console.log(`保存最后一个单词条目:`, currentEntry);
+                                // console.log(`保存最后一个单词条目:`, currentEntry);
                             }
                             
-                            console.log(`识别到 ${wordLines.length} 个单词条目`);
-                            console.log(`单词条目:`, wordLines);
+                            // console.log(`识别到 ${wordLines.length} 个单词条目`);
+                            // console.log(`单词条目:`, wordLines);
                             
                             // 转换为单词列表并添加到总列表
                             wordLines.forEach((entry, index) => {
@@ -2870,29 +2869,29 @@
                                     page: pageIndex + 1
                                 };
                                 words.push(wordObj);
-                                console.log(`向单词列表添加第 ${words.length} 个单词:`, wordObj);
+                                // console.log(`向单词列表添加第 ${words.length} 个单词:`, wordObj);
                             });
                             
-                            console.log(`页面 ${pageIndex + 1} 处理完成，当前总单词数: ${words.length}`);
+                            // console.log(`页面 ${pageIndex + 1} 处理完成，当前总单词数: ${words.length}`);
                         } else {
-                            console.log(`页面 ${pageIndex + 1} 未找到表格开始位置`);
+                            // console.log(`页面 ${pageIndex + 1} 未找到表格开始位置`);
                         }
                     });
                     
-                    console.log('最终提取的单词数:', words.length);
-                    console.log('提取的单词列表:', words);
+                    // console.log('最终提取的单词数:', words.length);
+                    // console.log('提取的单词列表:', words);
                     
                     // 详细日志：打印每个单词的信息
-                    console.log('详细单词信息:');
+                    // console.log('详细单词信息:');
                     words.forEach((word, index) => {
-                        console.log(`单词 ${index + 1}:`, word);
+                        // console.log(`单词 ${index + 1}:`, word);
                     });
                     
                     if (words.length > 0) {
-                        console.log('开始显示单词列表');
+                        // console.log('开始显示单词列表');
                     } else {
                         // 如果没有提取到数据，使用备用数据
-                        console.log('未从PDF提取到数据，使用备用数据');
+                        // console.log('未从PDF提取到数据，使用备用数据');
                         loadFallbackData();
                     }
                     
@@ -2924,7 +2923,7 @@
         
         // 加载备用数据
         function loadFallbackData() {
-            console.log('加载备用数据:', currentFile);
+            // console.log('加载备用数据:', currentFile);
             // 备用数据
             const fallbackData = {
                 '3上.pdf': [
@@ -2987,8 +2986,8 @@
             
             // 直接使用备用数据，确保即使PDF加载失败也能显示单词
             words = fallbackData[currentFile] || fallbackData['3上.pdf'];
-            console.log('备用数据加载结果:', words.length, '个单词');
-            console.log('备用数据内容:', words);
+            // console.log('备用数据加载结果:', words.length, '个单词');
+            // console.log('备用数据内容:', words);
             
             // 初始化课本数据
             DataManager.initBookData(currentUser, currentFile, words.length);
@@ -3011,6 +3010,24 @@
         // 加载模拟数据（当PDF加载失败时使用）
         function loadMockData() {
             loadFallbackData();
+        }
+        
+        // 播放音标声音
+        function playPhoneticSound(phonetic) {
+            try {
+                // 使用浏览器的 Text-to-Speech API 直接播放国际音标
+                // 设置语言为英语，确保发音准确
+                const utterance = new SpeechSynthesisUtterance(phonetic);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.5; // 放慢语速，使音标发音更清晰
+                utterance.pitch = 1.0; // 保持正常音调
+                utterance.volume = 1.0; // 保持正常音量
+                
+                // 播放音标
+                speechSynthesis.speak(utterance);
+            } catch (e) {
+                // console.log('音标播放失败:', e);
+            }
         }
         
         // 音频管理对象
@@ -3054,7 +3071,7 @@
                     oscillator.start(audioContext.currentTime);
                     oscillator.stop(audioContext.currentTime + duration);
                 } catch (e) {
-                    console.log('音频播放失败:', e);
+                    // console.log('音频播放失败:', e);
                 }
             }
         };
@@ -3206,20 +3223,20 @@
             // 添加错词
             addErrorWord(username, word) {
                 const userKey = `userStats_${username}`;
-                console.log(`[错词本日志] 开始添加错词: ${word.word} for user: ${username}`);
+                // console.log(`[错词本日志] 开始添加错词: ${word.word} for user: ${username}`);
                 
                 // 直接从localStorage获取并解析数据，避免使用缓存
                 let userData = null;
                 try {
                     const storedData = localStorage.getItem(userKey);
-                    console.log(`[错词本日志] 从localStorage获取的数据:`, storedData);
+                    // console.log(`[错词本日志] 从localStorage获取的数据:`, storedData);
                     userData = storedData ? JSON.parse(storedData) : null;
                 } catch (e) {
                     console.error(`[错词本日志] 解析localStorage数据失败:`, e);
                     userData = null;
                 }
                 
-                console.log(`[错词本日志] 解析后的用户数据:`, userData);
+                // console.log(`[错词本日志] 解析后的用户数据:`, userData);
                 
                 // 确保userData存在
                 if (!userData) {
@@ -3240,13 +3257,13 @@
                         books: {},
                         errorWords: []
                     };
-                    console.log(`[错词本日志] 创建初始用户数据`);
+                    // console.log(`[错词本日志] 创建初始用户数据`);
                 }
                 
                 // 确保errorWords是数组
                 if (!userData.errorWords || !Array.isArray(userData.errorWords)) {
                     userData.errorWords = [];
-                    console.log(`[错词本日志] 初始化errorWords数组`);
+                    // console.log(`[错词本日志] 初始化errorWords数组`);
                 }
                 
                 // 确保today存在
@@ -3257,7 +3274,7 @@
                         correct: 0,
                         error: 0
                     };
-                    console.log(`[错词本日志] 初始化today数据`);
+                    // console.log(`[错词本日志] 初始化today数据`);
                 } else {
                     // 确保today的属性是数字
                     userData.today.learning = Number(userData.today.learning) || 0;
@@ -3274,7 +3291,7 @@
                         correct: 0,
                         error: 0
                     };
-                    console.log(`[错词本日志] 初始化total数据`);
+                    // console.log(`[错词本日志] 初始化total数据`);
                 } else {
                     // 确保total的属性是数字
                     userData.total.learning = Number(userData.total.learning) || 0;
@@ -3286,21 +3303,26 @@
                 // 确保books存在
                 if (!userData.books) {
                     userData.books = {};
-                    console.log(`[错词本日志] 初始化books数据`);
+                    // console.log(`[错词本日志] 初始化books数据`);
                 }
                 
                 // 再次检查errorWords
-                console.log(`[错词本日志] errorWords类型: ${typeof userData.errorWords}`);
-                console.log(`[错词本日志] errorWords是否为数组: ${Array.isArray(userData.errorWords)}`);
-                console.log(`[错词本日志] errorWords长度: ${userData.errorWords.length}`);
-                console.log(`[错词本日志] errorWords内容:`, userData.errorWords);
+                // console.log(`[错词本日志] errorWords类型: ${typeof userData.errorWords}`);
+                // console.log(`[错词本日志] errorWords是否为数组: ${Array.isArray(userData.errorWords)}`);
+                // console.log(`[错词本日志] errorWords长度: ${userData.errorWords.length}`);
+                // console.log(`[错词本日志] errorWords内容:`, userData.errorWords);
                 
                 // 检查单词是否已存在
                 const existingWord = userData.errorWords.find(w => w.word === word.word);
-                console.log(`[错词本日志] 检查单词是否已存在: ${word.word}, 结果: ${existingWord ? '已存在' : '不存在'}`);
+                // console.log(`[错词本日志] 检查单词是否已存在: ${word.word}, 结果: ${existingWord ? '已存在' : '不存在'}`);
                 
                 if (!existingWord) {
-                    userData.errorWords.push(word);
+                    // 添加加入时间戳
+                    const wordWithTimestamp = {
+                        ...word,
+                        addedAt: Date.now()
+                    };
+                    userData.errorWords.push(wordWithTimestamp);
                     userData.today.error++;
                     userData.total.error++;
                     
@@ -3315,14 +3337,14 @@
                     // 保存数据到localStorage
                     try {
                         localStorage.setItem(userKey, JSON.stringify(saveData));
-                        console.log(`[错词本日志] 成功添加错词: ${word.word}, 新的错词数量: ${userData.errorWords.length}`);
-                        console.log(`[错词本日志] 错词列表:`, userData.errorWords);
-                        console.log(`[错词本日志] 保存的数据:`, saveData);
+                        // console.log(`[错词本日志] 成功添加错词: ${word.word}, 新的错词数量: ${userData.errorWords.length}`);
+                        // console.log(`[错词本日志] 错词列表:`, userData.errorWords);
+                        // console.log(`[错词本日志] 保存的数据:`, saveData);
                     } catch (e) {
                         console.error(`[错词本日志] 保存数据失败:`, e);
                     }
                 } else {
-                    console.log(`[错词本日志] 单词已存在: ${word.word}`);
+                    // console.log(`[错词本日志] 单词已存在: ${word.word}`);
                 }
                 return userData.errorWords;
             },
@@ -3330,13 +3352,29 @@
             // 移除错词
             removeErrorWord(username, word) {
                 const userKey = `userStats_${username}`;
-                console.log(`[错词本日志] 开始移除错词: ${word} for user: ${username}`);
+                // console.log(`[错词本日志] 开始移除错词: ${word} for user: ${username}`);
                 
                 let userData = JSON.parse(localStorage.getItem(userKey));
-                console.log(`[错词本日志] 原始用户数据:`, userData);
+                // console.log(`[错词本日志] 原始用户数据:`, userData);
                 
                 if (userData && userData.errorWords) {
                     const originalLength = userData.errorWords.length;
+                    
+                    // 查找要移除的错词
+                    const wordToRemove = userData.errorWords.find(w => w.word === word);
+                    
+                    // 检查是否在1分钟内添加的
+                    if (wordToRemove && wordToRemove.addedAt) {
+                        const now = Date.now();
+                        const timeDiff = now - wordToRemove.addedAt;
+                        const oneMinute = 60 * 1000; // 1分钟 = 60000毫秒
+                        
+                        if (timeDiff < oneMinute) {
+                            // console.log(`[错词本日志] 错词加入时间不足1分钟，不能移除: ${word}, 已过去: ${Math.floor(timeDiff / 1000)}秒`);
+                            return userData.errorWords; // 返回原列表，不移除
+                        }
+                    }
+                    
                     userData.errorWords = userData.errorWords.filter(w => w.word !== word);
                     
                     // 更新统计数据
@@ -3352,23 +3390,23 @@
                     };
                     
                     localStorage.setItem(userKey, JSON.stringify(saveData));
-                    console.log(`[错词本日志] 成功移除错词: ${word}, 原始数量: ${originalLength}, 新数量: ${userData.errorWords.length}`);
-                    console.log(`[错词本日志] 统计数据更新: correct=${userData.today.correct}`);
+                    // console.log(`[错词本日志] 成功移除错词: ${word}, 原始数量: ${originalLength}, 新数量: ${userData.errorWords.length}`);
+                    // console.log(`[错词本日志] 统计数据更新: correct=${userData.today.correct}`);
                     return userData.errorWords;
                 }
-                console.log(`[错词本日志] 无用户数据或errorWords数组`);
+                // console.log(`[错词本日志] 无用户数据或errorWords数组`);
                 return [];
             },
             
             // 获取错词列表
             getErrorWords(username) {
-                console.log(`[错词本日志] 开始获取错词列表 for user: ${username}`);
+                // console.log(`[错词本日志] 开始获取错词列表 for user: ${username}`);
                 const userData = this.getUserData(username);
-                console.log(`[错词本日志] 获取到的用户数据:`, userData);
-                console.log(`[错词本日志] errorWords:`, userData?.errorWords);
-                console.log(`[错词本日志] errorWords长度: ${userData?.errorWords?.length}`);
+                // console.log(`[错词本日志] 获取到的用户数据:`, userData);
+                // console.log(`[错词本日志] errorWords:`, userData?.errorWords);
+                // console.log(`[错词本日志] errorWords长度: ${userData?.errorWords?.length}`);
                 const result = userData && userData.errorWords ? userData.errorWords : [];
-                console.log(`[错词本日志] 返回的错词列表:`, result);
+                // console.log(`[错词本日志] 返回的错词列表:`, result);
                 return result;
             }
         };
@@ -3377,6 +3415,61 @@
         async function loadUserStats() {
             userStats = DataManager.initUserData(currentUser);
             updateStatsDisplay();
+        }
+        
+        // 加载用户最近学习的课本或默认课本
+        function loadUserBook() {
+            // 从localStorage获取用户最近学习的课本
+            const userBookKey = `userBook_${currentUser}`;
+            const savedBook = localStorage.getItem(userBookKey);
+            
+            if (savedBook) {
+                // 加载保存的课本
+                const bookData = JSON.parse(savedBook);
+                currentFile = bookData.file;
+                currentBookName = bookData.name;
+            } else {
+                // 设置默认课本
+                setDefaultBook();
+            }
+            
+            // 更新教材显示
+            updateBookDisplay();
+            // 加载PDF
+            loadPDF();
+        }
+        
+        // 设置默认课本
+        function setDefaultBook() {
+            switch (currentUser) {
+                case 'qiuqiu':
+                    currentFile = '7下.pdf';
+                    currentBookName = '七年级下册';
+                    break;
+                case 'youyou':
+                    currentFile = '5下.pdf';
+                    currentBookName = '五年级下册';
+                    break;
+                case 'diandian':
+                    currentFile = '3上.pdf';
+                    currentBookName = '三年级上册';
+                    break;
+                default:
+                    currentFile = '3下.pdf';
+                    currentBookName = '三年级下册';
+            }
+            
+            // 保存默认课本到localStorage
+            saveUserBook();
+        }
+        
+        // 保存用户最近学习的课本
+        function saveUserBook() {
+            const userBookKey = `userBook_${currentUser}`;
+            localStorage.setItem(userBookKey, JSON.stringify({
+                file: currentFile,
+                name: currentBookName
+            }));
         }
         
         // 更新统计显示
@@ -3420,16 +3513,16 @@
             const wordListPage = document.getElementById('wordListPage');
             const wordList = document.getElementById('wordList');
             
-            console.log('openWordLinkPage - before saving:');
-            console.log('  wordList:', wordList);
-            console.log('  wordListPage:', wordListPage);
-            console.log('  wordList.scrollTop:', wordList ? wordList.scrollTop : 'null');
-            console.log('  wordListPage.classList:', wordListPage ? Array.from(wordListPage.classList) : 'null');
-            console.log('  wordListPage.classList.contains(\'active\'):', wordListPage ? wordListPage.classList.contains('active') : 'null');
+            // console.log('openWordLinkPage - before saving:');
+            // console.log('  wordList:', wordList);
+            // console.log('  wordListPage:', wordListPage);
+            // console.log('  wordList.scrollTop:', wordList ? wordList.scrollTop : 'null');
+            // console.log('  wordListPage.classList:', wordListPage ? Array.from(wordListPage.classList) : 'null');
+            // console.log('  wordListPage.classList.contains(\'active\'):', wordListPage ? wordListPage.classList.contains('active') : 'null');
             
             if (wordList) {
                 savedScrollPosition = wordList.scrollTop;
-                console.log('  savedScrollPosition:', savedScrollPosition);
+                // console.log('  savedScrollPosition:', savedScrollPosition);
             }
             
             currentWordIndex = index;
@@ -3512,15 +3605,15 @@
             document.getElementById('wordLinkPage').classList.remove('active');
             document.getElementById('wordListPage').classList.add('active');
             
-            console.log('backToWordList - before restoring:');
-            console.log('  savedScrollPosition:', savedScrollPosition);
+            // console.log('backToWordList - before restoring:');
+            // console.log('  savedScrollPosition:', savedScrollPosition);
             
             setTimeout(() => {
                 const wordList = document.getElementById('wordList');
-                console.log('  wordList.scrollTop after timeout:', wordList ? wordList.scrollTop : 'null');
+                // console.log('  wordList.scrollTop after timeout:', wordList ? wordList.scrollTop : 'null');
                 if (wordList) {
                     wordList.scrollTop = savedScrollPosition;
-                    console.log('  Set scrollTop to:', savedScrollPosition);
+                    // console.log('  Set scrollTop to:', savedScrollPosition);
                 }
             }, 50);
         }
@@ -3663,8 +3756,8 @@
                     const transcript = event.results[0][0].transcript.trim().toLowerCase();
                     const targetWord = currentWord.toLowerCase();
                     
-                    console.log('识别结果:', transcript);
-                    console.log('目标单词:', targetWord);
+                    // console.log('识别结果:', transcript);
+                    // console.log('目标单词:', targetWord);
                     
                     const score = calculateScore(transcript, targetWord);
                     scoreValue.textContent = score;
@@ -3695,7 +3788,7 @@
             };
             
             recognition.onend = () => {
-                console.log('语音识别结束');
+                // console.log('语音识别结束');
             };
             
             // 由于MediaRecorder生成的是音频文件，而SpeechRecognition需要实时流
@@ -4042,243 +4135,756 @@
         }
         
         // 生成字母与音标的对应关系
+        // 音标符号列表（按长度排序，长的优先匹配）
+        const PHONETIC_SYMBOLS = [
+            'tʃ', 'dʒ', 'ts', 'dz', 'tr', 'dr',
+            'ŋ', 'ʃ', 'ʒ', 'θ', 'ð',
+            'ɑː', 'ɔː', 'ɜː', 'iː', 'uː', 'əʊ', 'eɪ', 'aɪ', 'ɔɪ', 'aʊ',
+            'ɪə', 'eə', 'ʊə',
+            'æ', 'ɒ', 'ʌ', 'ə', 'ɪ', 'ʊ', 'i', 'e', 'o', 'u', 'a', 'ɡ',
+            'p', 'b', 't', 'd', 'k', 'f', 'v', 's', 'z', 'h', 'm', 'n', 'l', 'r', 'w', 'j'
+        ];
+
+        // 解析音标字符串为符号数组
+        function parsePhonetic(phoneticStr) {
+            const symbols = [];
+            // 先移除所有非音标字符
+            let remaining = phoneticStr.replace(/[\\/ˈʼ'\s]/g, '').replace(/\(([^)]+)\)/g, '$1');
+            
+            while (remaining.length > 0) {
+                let matched = false;
+                // 优先匹配多字符音标
+                for (const symbol of PHONETIC_SYMBOLS) {
+                    if (remaining.startsWith(symbol)) {
+                        symbols.push(symbol);
+                        remaining = remaining.slice(symbol.length);
+                        matched = true;
+                        break;
+                    }
+                }
+                if (!matched) {
+                    // 处理单个字符
+                    symbols.push(remaining[0]);
+                    remaining = remaining.slice(1);
+                }
+            }
+            return symbols;
+        }
+
+        // 字母组合映射表（按长度降序排序）
+        const LETTER_COMBINATIONS = [
+            { pattern: 'tion', phonetic: 'ʃən', type: 'ending' },
+            { pattern: 'sion', phonetic: 'ʒən', type: 'ending' },
+            { pattern: 'ture', phonetic: 'tʃə', type: 'ending' },
+            { pattern: 'sure', phonetic: 'ʒə', type: 'ending' },
+            { pattern: 'ght', phonetic: 't', type: 'ending' },
+            { pattern: 'igh', phonetic: 'aɪ', type: 'vowel' },
+            { pattern: 'ight', phonetic: 'aɪt', type: 'ending' },
+            { pattern: 'ough', phonetic: 'ʌf', type: 'vowel' },
+            { pattern: 'augh', phonetic: 'ɔː', type: 'vowel' },
+            { pattern: 'eigh', phonetic: 'eɪ', type: 'vowel' },
+            { pattern: 'ei', phonetic: 'eɪ', type: 'vowel' },
+            { pattern: 'ie', phonetic: 'iː', type: 'vowel' },
+            { pattern: 'ui', phonetic: 'juː', type: 'vowel' },
+            { pattern: 'ew', phonetic: 'juː', type: 'vowel' },
+            { pattern: 'oo', phonetic: 'uː', type: 'vowel' },
+            { pattern: 'oo', phonetic: 'ʊ', type: 'vowel' }, // 变体：foot, football
+            { pattern: 'oa', phonetic: 'əʊ', type: 'vowel' },
+            { pattern: 'ow', phonetic: 'aʊ', type: 'vowel' },
+            { pattern: 'ow', phonetic: 'əʊ', type: 'vowel' }, // 变体：low, grow
+            { pattern: 'ou', phonetic: 'aʊ', type: 'vowel' },
+            { pattern: 'ou', phonetic: 'ʌ', type: 'vowel' }, // 变体：touch, country
+            { pattern: 'ou', phonetic: 'uː', type: 'vowel' }, // 变体：soup, group
+            { pattern: 'oy', phonetic: 'ɔɪ', type: 'vowel' },
+            { pattern: 'oi', phonetic: 'ɔɪ', type: 'vowel' },
+            { pattern: 'ir', phonetic: 'ɜː', type: 'vowel' },
+            { pattern: 'ur', phonetic: 'ɜː', type: 'vowel' },
+            { pattern: 'er', phonetic: 'ə', type: 'ending' },
+            { pattern: 'ar', phonetic: 'ɑː', type: 'vowel' },
+            { pattern: 'or', phonetic: 'ɔː', type: 'vowel' },
+            { pattern: 'ay', phonetic: 'eɪ', type: 'ending' },
+            { pattern: 'ey', phonetic: 'eɪ', type: 'ending' },
+            { pattern: 'ai', phonetic: 'eɪ', type: 'vowel' },
+            { pattern: 'ea', phonetic: 'iː', type: 'vowel' },
+            { pattern: 'ee', phonetic: 'iː', type: 'vowel' },
+            { pattern: 'au', phonetic: 'ɔː', type: 'vowel' },
+            { pattern: 'aw', phonetic: 'ɔː', type: 'vowel' },
+            { pattern: 'al', phonetic: 'ɔːl', type: 'vowel' },
+            { pattern: 'wh', phonetic: 'w', type: 'consonant' },
+            { pattern: 'wr', phonetic: 'r', type: 'consonant' },
+            { pattern: 'kn', phonetic: 'n', type: 'consonant' },
+            { pattern: 'gn', phonetic: 'n', type: 'consonant' },
+            { pattern: 'mb', phonetic: 'm', type: 'ending' },
+            { pattern: 'ck', phonetic: 'k', type: 'consonant' },
+            { pattern: 'sh', phonetic: 'ʃ', type: 'consonant' },
+            { pattern: 'ch', phonetic: 'tʃ', type: 'consonant' },
+            { pattern: 'th', phonetic: 'θ', type: 'consonant' },
+            { pattern: 'th', phonetic: 'ð', type: 'consonant' }, // 变体：this, that
+            { pattern: 'ph', phonetic: 'f', type: 'consonant' },
+            { pattern: 'ng', phonetic: 'ŋ', type: 'consonant' },
+            { pattern: 'nk', phonetic: 'ŋk', type: 'consonant' },
+            { pattern: 'qu', phonetic: 'kw', type: 'consonant' },
+            { pattern: 'gh', phonetic: '', type: 'silent' }
+        ].sort((a, b) => b.pattern.length - a.pattern.length);
+
+        // 特殊单词映射表
+        const SPECIAL_WORDS = {
+            'english': [
+                { letter: 'E', phonetic: 'ɪŋ' },
+                { letter: 'n', phonetic: 'ɡ' },
+                { letter: 'g', phonetic: 'l' },
+                { letter: 'l', phonetic: 'ɪ' },
+                { letter: 'i', phonetic: 'ʃ' }
+            ],
+            'school': [
+                { letter: 'sch', phonetic: 'skuː' }
+            ],
+            'everyone': [
+                { letter: 'e', phonetic: 'e' },
+                { letter: 'v', phonetic: 'v' },
+                { letter: 'e', phonetic: 'r' },
+                { letter: 'r', phonetic: 'y' },
+                { letter: 'y', phonetic: 'ɒ' },
+                { letter: 'o', phonetic: 'n' },
+                { letter: 'n', phonetic: '' },
+                { letter: 'e', phonetic: '' }
+            ],
+            'notebook': [
+                { letter: 'n', phonetic: 'n' },
+                { letter: 'o', phonetic: 'əʊ' },
+                { letter: 't', phonetic: '' },
+                { letter: 'e', phonetic: '' },
+                { letter: 'b', phonetic: 'b' },
+                { letter: 'o', phonetic: 'ʊ' },
+                { letter: 'ok', phonetic: 'k' }
+            ],
+            'hey': [
+                { letter: 'h', phonetic: 'h' },
+                { letter: 'ey', phonetic: 'eɪ' }
+            ],
+            'near': [
+                { letter: 'n', phonetic: 'n' },
+                { letter: 'ear', phonetic: 'ɪə' }
+            ],
+            'before': [
+                { letter: 'b', phonetic: 'b' },
+                { letter: 'e', phonetic: 'ɪ' },
+                { letter: 'f', phonetic: 'f' },
+                { letter: 'o', phonetic: 'ɔː' },
+                { letter: 're', phonetic: '' }
+            ],
+            'make': [
+                { letter: 'm', phonetic: 'm' },
+                { letter: 'a', phonetic: 'eɪ' },
+                { letter: 'ke', phonetic: 'k' }
+            ],
+            'take': [
+                { letter: 't', phonetic: 't' },
+                { letter: 'a', phonetic: 'eɪ' },
+                { letter: 'ke', phonetic: 'k' }
+            ],
+            'name': [
+                { letter: 'n', phonetic: 'n' },
+                { letter: 'a', phonetic: 'eɪ' },
+                { letter: 'me', phonetic: 'm' }
+            ],
+            'home': [
+                { letter: 'h', phonetic: 'h' },
+                { letter: 'o', phonetic: 'əʊ' },
+                { letter: 'me', phonetic: 'm' }
+            ],
+            'like': [
+                { letter: 'l', phonetic: 'l' },
+                { letter: 'i', phonetic: 'aɪ' },
+                { letter: 'ke', phonetic: 'k' }
+            ],
+            'time': [
+                { letter: 't', phonetic: 't' },
+                { letter: 'i', phonetic: 'aɪ' },
+                { letter: 'me', phonetic: 'm' }
+            ],
+            'five': [
+                { letter: 'f', phonetic: 'f' },
+                { letter: 'i', phonetic: 'aɪ' },
+                { letter: 've', phonetic: 'v' }
+            ],
+            'bike': [
+                { letter: 'b', phonetic: 'b' },
+                { letter: 'i', phonetic: 'aɪ' },
+                { letter: 'ke', phonetic: 'k' }
+            ],
+            'cake': [
+                { letter: 'c', phonetic: 'k' },
+                { letter: 'a', phonetic: 'eɪ' },
+                { letter: 'ke', phonetic: 'k' }
+            ],
+            'lake': [
+                { letter: 'l', phonetic: 'l' },
+                { letter: 'a', phonetic: 'eɪ' },
+                { letter: 'ke', phonetic: 'k' }
+            ],
+            'game': [
+                { letter: 'g', phonetic: 'ɡ' },
+                { letter: 'a', phonetic: 'eɪ' },
+                { letter: 'me', phonetic: 'm' }
+            ],
+            'face': [
+                { letter: 'f', phonetic: 'f' },
+                { letter: 'a', phonetic: 'eɪ' },
+                { letter: 'ce', phonetic: 's' }
+            ],
+            'late': [
+                { letter: 'l', phonetic: 'l' },
+                { letter: 'a', phonetic: 'eɪ' },
+                { letter: 'te', phonetic: 't' }
+            ],
+            'hate': [
+                { letter: 'h', phonetic: 'h' },
+                { letter: 'a', phonetic: 'eɪ' },
+                { letter: 'te', phonetic: 't' }
+            ],
+            'date': [
+                { letter: 'd', phonetic: 'd' },
+                { letter: 'a', phonetic: 'eɪ' },
+                { letter: 'te', phonetic: 't' }
+            ],
+            'gate': [
+                { letter: 'g', phonetic: 'ɡ' },
+                { letter: 'a', phonetic: 'eɪ' },
+                { letter: 'te', phonetic: 't' }
+            ],
+            'meat': [
+                { letter: 'm', phonetic: 'm' },
+                { letter: 'ea', phonetic: 'iː' },
+                { letter: 't', phonetic: 't' }
+            ],
+            'read': [
+                { letter: 'r', phonetic: 'r' },
+                { letter: 'ea', phonetic: 'iː' },
+                { letter: 'd', phonetic: 'd' }
+            ],
+            'teacher': [
+                { letter: 't', phonetic: 'tʃ' },
+                { letter: 'ea', phonetic: 'iː' },
+                { letter: 'ch', phonetic: '' },
+                { letter: 'er', phonetic: 'ə' }
+            ],
+            'clean': [
+                { letter: 'cl', phonetic: 'kl' },
+                { letter: 'ea', phonetic: 'iː' },
+                { letter: 'n', phonetic: 'n' }
+            ],
+            'please': [
+                { letter: 'pl', phonetic: 'pl' },
+                { letter: 'ea', phonetic: 'iː' },
+                { letter: 'se', phonetic: 'z' }
+            ],
+            'eat': [
+                { letter: 'ea', phonetic: 'iː' },
+                { letter: 't', phonetic: 't' }
+            ],
+            'tea': [
+                { letter: 't', phonetic: 't' },
+                { letter: 'ea', phonetic: 'iː' }
+            ],
+            'sea': [
+                { letter: 's', phonetic: 's' },
+                { letter: 'ea', phonetic: 'iː' }
+            ],
+            'head': [
+                { letter: 'h', phonetic: 'h' },
+                { letter: 'ea', phonetic: 'e' },
+                { letter: 'd', phonetic: 'd' }
+            ],
+            'bread': [
+                { letter: 'br', phonetic: 'br' },
+                { letter: 'ea', phonetic: 'e' },
+                { letter: 'd', phonetic: 'd' }
+            ],
+            'break': [
+                { letter: 'br', phonetic: 'br' },
+                { letter: 'ea', phonetic: 'eɪ' },
+                { letter: 'k', phonetic: 'k' }
+            ],
+            'great': [
+                { letter: 'gr', phonetic: 'ɡr' },
+                { letter: 'ea', phonetic: 'eɪ' },
+                { letter: 't', phonetic: 't' }
+            ],
+            'girl': [
+                { letter: 'g', phonetic: 'ɡ' },
+                { letter: 'ir', phonetic: 'ɜː' },
+                { letter: 'l', phonetic: 'l' }
+            ],
+            'bird': [
+                { letter: 'b', phonetic: 'b' },
+                { letter: 'ir', phonetic: 'ɜː' },
+                { letter: 'd', phonetic: 'd' }
+            ],
+            'first': [
+                { letter: 'f', phonetic: 'f' },
+                { letter: 'ir', phonetic: 'ɜː' },
+                { letter: 'st', phonetic: 'st' }
+            ],
+            'third': [
+                { letter: 'th', phonetic: 'θ' },
+                { letter: 'ir', phonetic: 'ɜː' },
+                { letter: 'd', phonetic: 'd' }
+            ],
+            'birthday': [
+                { letter: 'b', phonetic: 'b' },
+                { letter: 'ir', phonetic: 'ɜː' },
+                { letter: 'th', phonetic: 'θ' },
+                { letter: 'da', phonetic: 'deɪ' },
+                { letter: 'y', phonetic: '' }
+            ],
+            'nurse': [
+                { letter: 'n', phonetic: 'n' },
+                { letter: 'ur', phonetic: 'ɜː' },
+                { letter: 'se', phonetic: 's' }
+            ],
+            'purple': [
+                { letter: 'p', phonetic: 'p' },
+                { letter: 'ur', phonetic: 'ɜː' },
+                { letter: 'ple', phonetic: 'pl' }
+            ],
+            'turn': [
+                { letter: 't', phonetic: 't' },
+                { letter: 'ur', phonetic: 'ɜː' },
+                { letter: 'n', phonetic: 'n' }
+            ],
+            'purse': [
+                { letter: 'p', phonetic: 'p' },
+                { letter: 'ur', phonetic: 'ɜː' },
+                { letter: 'se', phonetic: 's' }
+            ],
+            'learn': [
+                { letter: 'l', phonetic: 'l' },
+                { letter: 'ea', phonetic: 'ɜː' },
+                { letter: 'rn', phonetic: 'n' }
+            ],
+            'earth': [
+                { letter: 'ea', phonetic: 'ɜː' },
+                { letter: 'rth', phonetic: 'θ' }
+            ],
+            'work': [
+                { letter: 'w', phonetic: 'w' },
+                { letter: 'or', phonetic: 'ɜː' },
+                { letter: 'k', phonetic: 'k' }
+            ],
+            'world': [
+                { letter: 'w', phonetic: 'w' },
+                { letter: 'or', phonetic: 'ɜː' },
+                { letter: 'ld', phonetic: 'ld' }
+            ],
+            'word': [
+                { letter: 'w', phonetic: 'w' },
+                { letter: 'or', phonetic: 'ɜː' },
+                { letter: 'd', phonetic: 'd' }
+            ],
+            'horse': [
+                { letter: 'h', phonetic: 'h' },
+                { letter: 'or', phonetic: 'ɔː' },
+                { letter: 'se', phonetic: 's' }
+            ],
+            'for': [
+                { letter: 'f', phonetic: 'f' },
+                { letter: 'or', phonetic: 'ɔː' }
+            ],
+            'short': [
+                { letter: 'sh', phonetic: 'ʃ' },
+                { letter: 'or', phonetic: 'ɔː' },
+                { letter: 't', phonetic: 't' }
+            ],
+            'sport': [
+                { letter: 'sp', phonetic: 'sp' },
+                { letter: 'or', phonetic: 'ɔː' },
+                { letter: 't', phonetic: 't' }
+            ],
+            'door': [
+                { letter: 'd', phonetic: 'd' },
+                { letter: 'oor', phonetic: 'ɔː' }
+            ],
+            'floor': [
+                { letter: 'fl', phonetic: 'fl' },
+                { letter: 'oor', phonetic: 'ɔː' }
+            ],
+            'board': [
+                { letter: 'b', phonetic: 'b' },
+                { letter: 'oa', phonetic: 'ɔː' },
+                { letter: 'rd', phonetic: 'rd' }
+            ],
+            'coat': [
+                { letter: 'c', phonetic: 'k' },
+                { letter: 'oa', phonetic: 'əʊ' },
+                { letter: 't', phonetic: 't' }
+            ],
+            'boat': [
+                { letter: 'b', phonetic: 'b' },
+                { letter: 'oa', phonetic: 'əʊ' },
+                { letter: 't', phonetic: 't' }
+            ],
+            'road': [
+                { letter: 'r', phonetic: 'r' },
+                { letter: 'oa', phonetic: 'əʊ' },
+                { letter: 'd', phonetic: 'd' }
+            ],
+            'know': [
+                { letter: 'kn', phonetic: 'n' },
+                { letter: 'ow', phonetic: 'əʊ' }
+            ],
+            'show': [
+                { letter: 'sh', phonetic: 'ʃ' },
+                { letter: 'ow', phonetic: 'əʊ' }
+            ],
+            'snow': [
+                { letter: 'sn', phonetic: 'sn' },
+                { letter: 'ow', phonetic: 'əʊ' }
+            ],
+            'window': [
+                { letter: 'wi', phonetic: 'wɪn' },
+                { letter: 'd', phonetic: 'd' },
+                { letter: 'ow', phonetic: 'əʊ' }
+            ],
+            'yellow': [
+                { letter: 'y', phonetic: 'j' },
+                { letter: 'el', phonetic: 'el' },
+                { letter: 'low', phonetic: 'ləʊ' }
+            ],
+            'rain': [
+                { letter: 'r', phonetic: 'r' },
+                { letter: 'ai', phonetic: 'eɪ' },
+                { letter: 'n', phonetic: 'n' }
+            ],
+            'train': [
+                { letter: 'tr', phonetic: 'tr' },
+                { letter: 'ai', phonetic: 'eɪ' },
+                { letter: 'n', phonetic: 'n' }
+            ],
+            'wait': [
+                { letter: 'w', phonetic: 'w' },
+                { letter: 'ai', phonetic: 'eɪ' },
+                { letter: 't', phonetic: 't' }
+            ],
+            'play': [
+                { letter: 'pl', phonetic: 'pl' },
+                { letter: 'ay', phonetic: 'eɪ' }
+            ],
+            'say': [
+                { letter: 's', phonetic: 's' },
+                { letter: 'ay', phonetic: 'eɪ' }
+            ],
+            'day': [
+                { letter: 'd', phonetic: 'd' },
+                { letter: 'ay', phonetic: 'eɪ' }
+            ],
+            'may': [
+                { letter: 'm', phonetic: 'm' },
+                { letter: 'ay', phonetic: 'eɪ' }
+            ],
+            'way': [
+                { letter: 'w', phonetic: 'w' },
+                { letter: 'ay', phonetic: 'eɪ' }
+            ],
+            'they': [
+                { letter: 'th', phonetic: 'ð' },
+                { letter: 'ey', phonetic: 'eɪ' }
+            ],
+            'boy': [
+                { letter: 'b', phonetic: 'b' },
+                { letter: 'oy', phonetic: 'ɔɪ' }
+            ],
+            'toy': [
+                { letter: 't', phonetic: 't' },
+                { letter: 'oy', phonetic: 'ɔɪ' }
+            ],
+            'enjoy': [
+                { letter: 'e', phonetic: 'ɪn' },
+                { letter: 'j', phonetic: 'dʒ' },
+                { letter: 'oy', phonetic: 'ɔɪ' }
+            ],
+            'house': [
+                { letter: 'h', phonetic: 'h' },
+                { letter: 'ou', phonetic: 'aʊ' },
+                { letter: 'se', phonetic: 's' }
+            ],
+            'mouse': [
+                { letter: 'm', phonetic: 'm' },
+                { letter: 'ou', phonetic: 'aʊ' },
+                { letter: 'se', phonetic: 's' }
+            ],
+            'about': [
+                { letter: 'a', phonetic: 'ə' },
+                { letter: 'b', phonetic: 'b' },
+                { letter: 'out', phonetic: 'aʊt' }
+            ],
+            'out': [
+                { letter: 'ou', phonetic: 'aʊ' },
+                { letter: 't', phonetic: 't' }
+            ],
+            'down': [
+                { letter: 'd', phonetic: 'd' },
+                { letter: 'ow', phonetic: 'aʊn' }
+            ],
+            'brown': [
+                { letter: 'br', phonetic: 'br' },
+                { letter: 'own', phonetic: 'aʊn' }
+            ],
+            'cow': [
+                { letter: 'c', phonetic: 'k' },
+                { letter: 'ow', phonetic: 'aʊ' }
+            ],
+            'how': [
+                { letter: 'h', phonetic: 'h' },
+                { letter: 'ow', phonetic: 'aʊ' }
+            ],
+            'now': [
+                { letter: 'n', phonetic: 'n' },
+                { letter: 'ow', phonetic: 'aʊ' }
+            ],
+            'flower': [
+                { letter: 'fl', phonetic: 'fl' },
+                { letter: 'ow', phonetic: 'aʊə' },
+                { letter: 'er', phonetic: '' }
+            ],
+            'blue': [
+                { letter: 'bl', phonetic: 'bl' },
+                { letter: 'ue', phonetic: 'uː' }
+            ],
+            'true': [
+                { letter: 'tr', phonetic: 'tr' },
+                { letter: 'ue', phonetic: 'uː' }
+            ],
+            'chinese': [
+                { letter: 'ch', phonetic: 'tʃ' },
+                { letter: 'i', phonetic: 'aɪ' },
+                { letter: 'n', phonetic: 'n' },
+                { letter: 'ese', phonetic: 'iːz' }
+            ],
+            'watch': [
+                { letter: 'wa', phonetic: 'wɒ' },
+                { letter: 'tch', phonetic: 'tʃ' }
+            ],
+            'what': [
+                { letter: 'wh', phonetic: 'w' },
+                { letter: 'a', phonetic: 'ɒ' },
+                { letter: 't', phonetic: 't' }
+            ],
+            'when': [
+                { letter: 'wh', phonetic: 'w' },
+                { letter: 'en', phonetic: 'en' }
+            ],
+            'where': [
+                { letter: 'wh', phonetic: 'w' },
+                { letter: 'ere', phonetic: 'eə' }
+            ],
+            'who': [
+                { letter: 'wh', phonetic: 'h' },
+                { letter: 'o', phonetic: 'uː' }
+            ],
+            'whose': [
+                { letter: 'wh', phonetic: 'h' },
+                { letter: 'o', phonetic: 'uː' },
+                { letter: 'se', phonetic: 'z' }
+            ],
+            'write': [
+                { letter: 'wr', phonetic: 'raɪt' }
+            ],
+            'wrong': [
+                { letter: 'wr', phonetic: 'rɒŋ' }
+            ]
+        };
+
         function generateLetterPhoneticMap(word, phonetic) {
-            const map = [];
-            let i = 0;
-            let phoneticIndex = 0;
-            
-            // 移除音标的首尾斜杠和重音符号
-            let cleanPhonetic = phonetic.replace(/^\/|\/$|'|ˈ/g, '');
-            
-            // 处理音标中的括号部分，将括号中的部分作为一个整体
-            // 例如：/fɔ:(r) nəʊ/ -> /fɔ:r nəʊ/
-            cleanPhonetic = cleanPhonetic.replace(/\(([^)]+)\)/g, '$1');
-            
-            // 处理常见的字母组合及其对应的音标（按长度排序，长的在前）
-            const letterCombinations = [
-                // 三字母组合
-                { pattern: 'tion', phonetic: 'ʃən' },
-                { pattern: 'sion', phonetic: 'ʒən' },
-                // 双字母组合
-                { pattern: 'sh', phonetic: 'ʃ' },
-                { pattern: 'ch', phonetic: 'tʃ' },
-                { pattern: 'th', phonetic: 'θ' },
-                { pattern: 'ph', phonetic: 'f' },
-                { pattern: 'gh', phonetic: 'f' },
-                { pattern: 'ng', phonetic: 'ŋ' },
-                { pattern: 'wh', phonetic: 'w' },
-                { pattern: 'qu', phonetic: 'kw' },
-                { pattern: 'kn', phonetic: 'n' },
-                { pattern: 'mb', phonetic: 'm' },
-                { pattern: 'ey', phonetic: 'eɪ' },
-                { pattern: 'ay', phonetic: 'eɪ' },
-                { pattern: 'ai', phonetic: 'eɪ' },
-                { pattern: 'oy', phonetic: 'ɔɪ' },
-                { pattern: 'oi', phonetic: 'ɔɪ' },
-                { pattern: 'oa', phonetic: 'əʊ' },
-                { pattern: 'ow', phonetic: 'aʊ' },
-                { pattern: 'ou', phonetic: 'aʊ' },
-                { pattern: 'au', phonetic: 'aː' },
-                { pattern: 'ee', phonetic: 'iː' },
-                { pattern: 'ea', phonetic: 'iː' },
-                { pattern: 'oo', phonetic: 'uː' },
-                { pattern: 'er', phonetic: 'ə' },
-                { pattern: 'ir', phonetic: 'ɜː' },
-                { pattern: 'ur', phonetic: 'ɜː' },
-                { pattern: 'ar', phonetic: 'ɑː' },
-                { pattern: 'or', phonetic: 'ɔː' }
-            ].sort((a, b) => b.pattern.length - a.pattern.length); // 按长度降序排序
-            
-            // 特殊单词的处理
-            const specialWords = {
-                'everyone': [
-                    { letter: 'e', phonetic: 'e' },
-                    { letter: 'v', phonetic: 'v' },
-                    { letter: 'e', phonetic: '' },
-                    { letter: 'r', phonetic: 'r' },
-                    { letter: 'y', phonetic: 'i' },
-                    { letter: 'o', phonetic: 'w' },
-                    { letter: 'n', phonetic: 'ʌ' },
-                    { letter: 'e', phonetic: 'n' }
-                ],
-                'hey': [
-                    { letter: 'h', phonetic: 'h' },
-                    { letter: 'ey', phonetic: 'eɪ' }
-                ],
-                'notebook': [
-                    { letter: 'n', phonetic: 'n' },
-                    { letter: 'o', phonetic: 'əʊ' },
-                    { letter: 't', phonetic: 't' },
-                    { letter: 'e', phonetic: '' },
-                    { letter: 'b', phonetic: 'b' },
-                    { letter: 'o', phonetic: 'ʊ' },
-                    { letter: 'k', phonetic: 'k' }
-                ],
-                'school': [
-                    { letter: 's', phonetic: 's' },
-                    { letter: 'ch', phonetic: 'k' },
-                    { letter: 'o', phonetic: 'uː' },
-                    { letter: 'l', phonetic: 'l' }
-                ],
-                'shake hands': [
-                    { letter: 'sh', phonetic: 'ʃ' },
-                    { letter: 'a', phonetic: 'eɪ' },
-                    { letter: 'k', phonetic: 'k' },
-                    { letter: 'e', phonetic: '' },
-                    { letter: ' ', phonetic: '' },
-                    { letter: 'h', phonetic: 'h' },
-                    { letter: 'a', phonetic: 'æ' },
-                    { letter: 'n', phonetic: 'n' },
-                    { letter: 'd', phonetic: 'd' },
-                    { letter: 's', phonetic: 'z' }
-                ],
-                'enjoy': [
-                    { letter: 'e', phonetic: 'ɪ' },
-                    { letter: 'n', phonetic: 'n' },
-                    { letter: 'j', phonetic: 'dʒ' },
-                    { letter: 'o', phonetic: 'ɔɪ' },
-                    { letter: 'y', phonetic: '' }
-                ],
-                'near': [
-                    { letter: 'n', phonetic: 'n' },
-                    { letter: 'ear', phonetic: 'ɪə' },
-                    { letter: 'r', phonetic: '' }
-                ],
-                'before': [
-                    { letter: 'b', phonetic: 'b' },
-                    { letter: 'e', phonetic: 'ɪ' },
-                    { letter: 'f', phonetic: 'f' },
-                    { letter: 'o', phonetic: 'ɔː' },
-                    { letter: 'r', phonetic: '' },
-                    { letter: 'e', phonetic: '' }
-                ]
-            };
-            
             // 检查是否为特殊单词
-            if (specialWords[word]) {
-                return specialWords[word].map(item => {
-                    const colorCode = getPhoneticColor(item.letter, i, word);
+            const lowerWord = word.toLowerCase();
+            if (SPECIAL_WORDS[lowerWord]) {
+                const items = SPECIAL_WORDS[lowerWord];
+                let letterIndex = 0;
+                return items.map(item => {
+                    const colorCode = getPhoneticColor(item.letter, letterIndex, word);
+                    letterIndex += item.letter.length;
                     let cssColor = '#333333';
                     switch (colorCode) {
                         case 'r': cssColor = '#e74c3c'; break;
                         case 'b': cssColor = '#3498db'; break;
                         case 'g': cssColor = '#2ecc71'; break;
                     }
-                    return {
-                        ...item,
-                        color: cssColor
-                    };
+                    return { ...item, color: cssColor };
                 });
             }
-            
-            // 主处理循环
-            while (i < word.length && phoneticIndex < cleanPhonetic.length) {
-                // 特殊处理空格
-                if (word[i] === ' ') {
+
+            // 使用算法进行字母和音标的对齐
+            const map = [];
+            const phoneticSymbols = parsePhonetic(phonetic);
+            // console.log('Word:', word);
+            // console.log('Phonetic:', phonetic);
+            // console.log('Parsed phonetic symbols:', phoneticSymbols);
+            let letterIndex = 0;
+            let phoneticIndex = 0;
+
+            // 处理每个字母
+            while (letterIndex < word.length) {
+                const letter = word[letterIndex];
+                
+                // 跳过空格
+                if (letter === ' ') {
                     map.push({ letter: ' ', phonetic: '', color: '#333333' });
-                    i++;
+                    letterIndex++;
                     continue;
                 }
-                
-                let foundCombination = false;
-                
-                // 检查是否为字母组合
-                for (const combo of letterCombinations) {
-                    if (i + combo.pattern.length <= word.length && 
-                        word.substr(i, combo.pattern.length) === combo.pattern &&
-                        phoneticIndex + combo.phonetic.length <= cleanPhonetic.length &&
-                        cleanPhonetic.substr(phoneticIndex, combo.phonetic.length) === combo.phonetic) {
+
+                let matched = false;
+                const remainingWord = word.slice(letterIndex);
+                const remainingPhonetic = phoneticSymbols.slice(phoneticIndex).join('');
+
+                // 尝试匹配字母组合
+                for (const combo of LETTER_COMBINATIONS) {
+                    if (remainingWord.startsWith(combo.pattern)) {
+                        // 特殊情况处理
+                        let shouldSkip = false;
                         
-                        // 找到匹配的音标，添加到映射
-                        const colorCode = getPhoneticColor(combo.pattern, i, word);
+                        // ng 后面跟着 r 时，不将其视为组合（如 angry）
+                        if (combo.pattern === 'ng' && remainingWord.length > 2 && remainingWord[2] === 'r') {
+                            shouldSkip = true;
+                        }
+                        
+                        // sch 在某些情况下不视为组合（如 school）
+                        if (combo.pattern === 'sch' && remainingWord === 'school') {
+                            shouldSkip = true;
+                        }
+                        
+                        // al 组合在某些情况下不视为组合（如 football）
+                        if (combo.pattern === 'al' && remainingWord === 'al') {
+                            shouldSkip = true;
+                        }
+                        
+                        if (shouldSkip) {
+                            continue;
+                        }
+                        
+                        const colorCode = getPhoneticColor(combo.pattern, letterIndex, word);
                         let cssColor = '#333333';
                         switch (colorCode) {
                             case 'r': cssColor = '#e74c3c'; break;
                             case 'b': cssColor = '#3498db'; break;
                             case 'g': cssColor = '#2ecc71'; break;
                         }
+
+                        // 查找匹配的音标数量
+                        let phyCount = 0;
+                        let phyStr = '';
                         
-                        map.push({ 
-                            letter: combo.pattern, 
-                            phonetic: combo.phonetic, 
-                            color: cssColor 
-                        });
+                        // 先尝试完全匹配字母组合的音标
+                        if (combo.phonetic) {
+                            const comboPhonetic = combo.phonetic;
+                            if (remainingPhonetic.startsWith(comboPhonetic)) {
+                                // 计算需要多少个音标符号来匹配
+                                let tempIndex = phoneticIndex;
+                                let tempStr = '';
+                                while (tempIndex < phoneticSymbols.length && tempStr.length < comboPhonetic.length) {
+                                    tempStr += phoneticSymbols[tempIndex];
+                                    if (comboPhonetic.startsWith(tempStr)) {
+                                        tempIndex++;
+                                    } else {
+                                        break;
+                                    }
+                                }
+                                if (tempStr === comboPhonetic) {
+                                    phyCount = tempIndex - phoneticIndex;
+                                    phyStr = tempStr;
+                                }
+                            }
+                        }
                         
-                        // 更新索引
-                        phoneticIndex += combo.phonetic.length;
-                        i += combo.pattern.length;
-                        foundCombination = true;
-                        break;
+                        // 特殊情况：ar 组合在 scared 中发 /eə/ 音
+                        if (combo.pattern === 'ar' && lowerWord === 'scared' && remainingPhonetic.startsWith('eə')) {
+                            phyCount = 1;
+                            phyStr = 'eə';
+                        }
+                        
+                        // 对于不发音的字母组合
+                        if (combo.phonetic === '' && (combo.pattern === 'gh' || combo.pattern === 'kn' || combo.pattern === 'wr' || combo.pattern === 'mb')) {
+                            phyCount = 0;
+                            phyStr = '';
+                        }
+                        
+                        // 如果没有完全匹配，尝试匹配单个音标
+                        if (phyCount === 0 && phoneticIndex < phoneticSymbols.length) {
+                            // 对于 oo 组合，尝试匹配 /ʊ/ 音标
+                            if (combo.pattern === 'oo' && remainingPhonetic.startsWith('ʊ')) {
+                                phyCount = 1;
+                                phyStr = 'ʊ';
+                            } else if (combo.pattern === 'ou' && remainingPhonetic.startsWith('ʌ')) {
+                                // 对于 ou 组合，尝试匹配 /ʌ/ 音标
+                                phyCount = 1;
+                                phyStr = 'ʌ';
+                            } else if (combo.pattern === 'al' && remainingPhonetic.startsWith('ɔː')) {
+                                // 对于 al 组合，尝试匹配 /ɔː/ 音标
+                                phyCount = 1;
+                                phyStr = 'ɔː';
+                            } else {
+                                phyCount = 1;
+                                phyStr = phoneticSymbols[phoneticIndex];
+                            }
+                        }
+
+                        if (phyCount >= 0 || combo.pattern === 'gh' || combo.pattern === 'kn' || combo.pattern === 'wr' || combo.pattern === 'mb') {
+                            map.push({
+                                letter: combo.pattern,
+                                phonetic: phyStr || combo.phonetic,
+                                color: cssColor
+                            });
+                            letterIndex += combo.pattern.length;
+                            phoneticIndex += phyCount;
+                            matched = true;
+                            break;
+                        }
                     }
                 }
-                
-                // 如果不是字母组合，处理单个字母
-                if (!foundCombination) {
-                    const letter = word[i];
-                    const colorCode = getPhoneticColor(letter, i, word);
+
+                // 如果没有匹配到字母组合，尝试匹配单个字母
+                if (!matched) {
+                    const colorCode = getPhoneticColor(letter, letterIndex, word);
                     let cssColor = '#333333';
                     switch (colorCode) {
                         case 'r': cssColor = '#e74c3c'; break;
                         case 'b': cssColor = '#3498db'; break;
                         case 'g': cssColor = '#2ecc71'; break;
                     }
-                    
+
+                    // 尝试匹配当前音标符号
                     let letterPhonetic = '';
-                    
-                    // 尝试匹配双元音或长音
-                    if (phoneticIndex + 1 < cleanPhonetic.length) {
-                        const twoCharPhonetic = cleanPhonetic.substr(phoneticIndex, 2);
-                        if (twoCharPhonetic === 'eɪ' || twoCharPhonetic === 'aɪ' || 
-                            twoCharPhonetic === 'ɔɪ' || twoCharPhonetic === 'aʊ' || 
-                            twoCharPhonetic === 'əʊ' || twoCharPhonetic.endsWith('ː')) {
-                            letterPhonetic = twoCharPhonetic;
-                            phoneticIndex += 2;
-                        } else {
-                            // 否则取单个字符
-                            letterPhonetic = cleanPhonetic[phoneticIndex];
-                            phoneticIndex += 1;
-                        }
-                    } else if (phoneticIndex < cleanPhonetic.length) {
-                        // 只有一个字符时直接取
-                        letterPhonetic = cleanPhonetic[phoneticIndex];
-                        phoneticIndex += 1;
+                    if (phoneticIndex < phoneticSymbols.length) {
+                        letterPhonetic = phoneticSymbols[phoneticIndex];
+                        phoneticIndex++;
                     }
-                    
-                    // 添加到映射
-                    map.push({ 
-                        letter, 
-                        phonetic: letterPhonetic, 
-                        color: cssColor 
+
+                    map.push({
+                        letter: letter,
+                        phonetic: letterPhonetic,
+                        color: cssColor
                     });
-                    i++;
+                    letterIndex++;
                 }
             }
-            
-            // 处理剩余的字母（如果音标已经用完）
-            while (i < word.length) {
-                const letter = word[i];
-                const colorCode = getPhoneticColor(letter, i, word);
-                let cssColor = '#333333';
-                switch (colorCode) {
-                    case 'r': cssColor = '#e74c3c'; break;
-                    case 'b': cssColor = '#3498db'; break;
-                    case 'g': cssColor = '#2ecc71'; break;
+
+            // 处理剩余的音标（如果有）
+            while (phoneticIndex < phoneticSymbols.length) {
+                if (map.length > 0) {
+                    // 将剩余的音标添加到最后一个字母上
+                    const lastItem = map[map.length - 1];
+                    lastItem.phonetic += phoneticSymbols[phoneticIndex];
                 }
-                
-                map.push({ 
-                    letter, 
-                    phonetic: '', 
-                    color: cssColor 
-                });
-                i++;
+                phoneticIndex++;
             }
-            
+
             return map;
         }
         
         // 更新学习内容
         function updateLearningContent() {
-            console.log('更新学习内容，currentWordIndex:', currentWordIndex, 'words.length:', words.length, 'isErrorBookMode:', isErrorBookMode);
+            // console.log('更新学习内容，currentWordIndex:', currentWordIndex, 'words.length:', words.length, 'isErrorBookMode:', isErrorBookMode);
             const currentWord = isErrorBookMode ? errorWords[currentWordIndex] : words[currentWordIndex];
             if (!currentWord) {
                 console.error('当前单词不存在，currentWordIndex:', currentWordIndex, 'isErrorBookMode:', isErrorBookMode, 'words:', words, 'errorWords:', errorWords);
@@ -4286,7 +4892,7 @@
                 return;
             }
             
-            console.log('当前单词:', currentWord);
+            // console.log('当前单词:', currentWord);
             
             // 重新生成单词链路，确保在拼和写步骤中遮挡当前单词
             if (isErrorBookMode) {
@@ -4363,12 +4969,13 @@
                     // 创建容器，使用flex布局确保横向排列不换行
                     const mapContainer = document.createElement('div');
                     mapContainer.style.display = 'flex';
-                    mapContainer.style.alignItems = 'center';
+                    mapContainer.style.alignItems = 'flex-start'; // 顶部对齐，确保所有元素在同一行
                     mapContainer.style.justifyContent = 'flex-start'; // 左对齐显示
                     mapContainer.style.gap = '4px'; // 缩小间距
                     mapContainer.style.overflowX = 'auto'; // 当内容超出时显示滚动条
                     mapContainer.style.padding = '8px 0'; // 添加上下内边距
                     mapContainer.style.whiteSpace = 'nowrap'; // 防止换行
+                    mapContainer.style.minHeight = '60px'; // 设置最小高度，确保所有元素都能显示
                     
                     map.forEach(item => {
                         // 创建每个字母-音标对的容器
@@ -4378,7 +4985,8 @@
                         pairContainer.style.alignItems = 'center';
                         pairContainer.style.padding = '4px'; // 缩小内边距
                         pairContainer.style.minHeight = '50px'; // 设置最小高度，确保所有容器高度一致
-                        pairContainer.style.justifyContent = 'center'; // 垂直居中
+                        pairContainer.style.justifyContent = 'flex-start'; // 顶部对齐，确保字母在同一行
+                        pairContainer.style.minWidth = '30px'; // 设置最小宽度，确保布局稳定
                         
                         // 添加字母
                         const letterElement = document.createElement('span');
@@ -4396,6 +5004,12 @@
                             phoneticElement.style.marginTop = '4px';
                             phoneticElement.textContent = `/${item.phonetic}/`;
                             pairContainer.appendChild(phoneticElement);
+                            
+                            // 添加点击事件，播放对应音标的音
+                            pairContainer.style.cursor = 'pointer';
+                            pairContainer.addEventListener('click', () => {
+                                playPhoneticSound(item.phonetic);
+                            });
                         } else {
                             // 添加一个空的占位元素，保持布局一致
                             const emptyElement = document.createElement('span');
@@ -4830,7 +5444,7 @@
                 };
                 
                 localStorage.setItem(userKey, JSON.stringify(saveData));
-                console.log(`[错词本日志] 检查单词拼写，更新学习统计: learning=${userData.today.learning}`);
+                // console.log(`[错词本日志] 检查单词拼写，更新学习统计: learning=${userData.today.learning}`);
             }
             
             // 更新统计显示
@@ -5003,10 +5617,10 @@
                     errorWords: currentData.errorWords // 确保 errorWords 从当前数据中获取
                 };
                 localStorage.setItem(userKey, JSON.stringify(saveData));
-                console.log(`[错词本日志] 页面卸载时保存数据:`, saveData);
+                // console.log(`[错词本日志] 页面卸载时保存数据:`, saveData);
             } else {
                 localStorage.setItem(userKey, JSON.stringify(userStats));
-                console.log(`[错词本日志] 页面卸载时保存新数据:`, userStats);
+                // console.log(`[错词本日志] 页面卸载时保存新数据:`, userStats);
             }
         });
         
